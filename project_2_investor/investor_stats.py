@@ -1,46 +1,56 @@
 """
 Project: Automated Investor Data Analysis (5,500+ Records)
 Author: Anil Dangi
-Description: Extracts legal status codes from PAN numbers and maps 
-             them to full descriptions to generate status reports.
-Input: investors.csv
-Output: client_report.txt
+Description: Advanced cleaning pipeline for broken/quoted CSV files.
 """
-
 import pandas as pd
+import os
+import io
 
-# 1. Load and clean
-df = pd.read_csv('sales.csv')
-df.columns = [col.strip() for col in df.columns]
+base_path = os.path.dirname(__file__)
+csv_path = os.path.join(base_path, 'investors.csv')
+output_path = os.path.join(base_path, 'client_report.txt')
 
-# --- THE LOGIC ---
+try:
+    # 1. THE BRUTE FORCE CLEANUP
+    # We read the file as raw text to remove the "Quote Trap"
+    with open(csv_path, 'r') as f:
+        lines = f.readlines()
+    
+    # Remove " quotes from every line and then join them back together
+    clean_data = "".join([line.replace('"', '') for line in lines])
+    
+    # 2. LOAD THE CLEANED DATA
+    # Use io.StringIO to make the clean text look like a file to Pandas
+    df = pd.read_csv(io.StringIO(clean_data))
+    
+    # Remove extra spaces from column names
+    df.columns = df.columns.str.strip()
+    
+    # 3. VERIFY AND PROCESS
+    target_col = 'PAN Number'
+    if target_col not in df.columns:
+        print(f"Error: Could not find '{target_col}'. Found columns: {list(df.columns)}")
+        exit()
 
-# Q1: East Region Units
-east_units = df[df['Region'] == 'East'].groupby('City')['Units'].sum()
+    # Extract 4th character (Index 3) and clean spaces
+    df['Status_Code'] = df[target_col].str.strip().str[3].str.upper()
 
-# Q2 & Q3: SalesRep Performance (Top 10)
-rep_stats = df.groupby('SalesRep').agg({'Total Sales': 'sum', 'Units': 'sum'})
-top_10_reps = rep_stats.sort_values(by='Units', ascending=False).head(10)
+    # 4. MAP DESCRIPTIONS
+    status_map = {'P': 'Individual', 'C': 'Company', 'H': 'HUF', 'F': 'Firm', 'A': 'AOP', 'T': 'Trust'}
+    df['Status_Description'] = df['Status_Code'].map(status_map).fillna('Other')
 
-# Q4: Best Day
-best_day = df.groupby('Day')['Total Sales'].sum().idxmax()
+    # 5. OUTPUT
+    report = df['Status_Description'].value_counts()
+    print("\n--- INVESTOR STATUS REPORT ---")
+    print(report)
 
-# Q5: Worst Products
-worst_3 = df.groupby('Product')['Units'].sum().sort_values().head(3)
+    with open(output_path, 'w') as f:
+        f.write("--- INVESTOR STATUS REPORT ---\n")
+        f.write(report.to_string())
+    
+    print(f"\nSUCCESS: Report saved to {output_path}")
 
-# --- SAVING THE FULL REPORT ---
-with open('final_sales_report.txt', 'w') as f:
-    f.write("--- 🏆 COMPLETE SALES ANALYSIS REPORT ---\n\n")
-        
-    f.write("Q1: UNITS SOLD IN EAST REGION CITIES:\n")
-    f.write(east_units.to_string() + "\n\n")
-                    
-    f.write("Q3: TOP 10 SALES REPRESENTATIVES:\n")
-    f.write(top_10_reps.to_string() + "\n\n")
-                                
-    f.write(f"Q4: HIGHEST SELLING DAY: {best_day}\n\n")
-                                        
-    f.write("Q5: 3 LEAST SELLING PRODUCTS:\n")
-    f.write(worst_3.to_string() + "\n")
+except Exception as e:
+    print(f"\nCRITICAL ERROR: {e}")
 
-print("MISSION ACCOMPLISHED! All 5 requirements saved to final_sales_report.txt")

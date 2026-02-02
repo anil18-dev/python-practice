@@ -1,0 +1,9 @@
+--- INVESTOR STATUS REPORT ---
+Status_Description
+Other         2255
+Firm          1144
+Company        597
+AOP            448
+Trust          395
+HUF            361
+Individual     342
