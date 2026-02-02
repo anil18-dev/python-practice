@@ -10,6 +10,7 @@ Professional portfolio showcasing automated pipelines designed to transform mass
 
 ### 💡 The Solution:
 Leveraged Python's data analysis ecosystem (**Pandas**) to handle multi-dimensional analysis using advanced `groupby` operations and automated reporting.
+![Sales Analysis Report](./project_1_sales_analysis/solution.png)
 
 ### 🚀 Key Insights Generated:
 *   **Top Region:** East Region (Kolkata leading with 1,752 units).
@@ -17,7 +18,7 @@ Leveraged Python's data analysis ecosystem (**Pandas**) to handle multi-dimensio
 *   **Trend Analysis:** Identified Sunday as the highest selling day.
 *   **Product Insights:** Automatically identified bottom 3 products needing strategic intervention.
 
-[📂 View Code & Files](./project_3_sales_analysis/)
+[📂 View Code & Files](./project_1_sales_analysis/)
 
 ---
 
