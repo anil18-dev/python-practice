@@ -70,4 +70,4 @@ Built a Python automation pipeline to clean data, aggregate city-level sales, an
 - Clear business insights
 - Zero manual processing
 
-📂 project_4_retail_sales_analytics
+📁 [View Code & Files](project_4_retail_sales_analytics)
